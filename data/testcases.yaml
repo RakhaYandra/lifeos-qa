@@ -1,0 +1,448 @@
+- id: TC-AUTH-01
+  module: Auth
+  title: Login kredensial benar masuk dashboard
+  priority: High
+  type: functional
+  precond: DB seed; web :5174
+  steps: ["Buka web", "Isi aku@lifeos.local / Rahasia123", "Klik Masuk"]
+  expected: Halaman Dasbor tampil, KPI terisi, email tampil di header
+- id: TC-AUTH-02
+  module: Auth
+  title: Login password salah ditolak
+  priority: High
+  type: negative
+  precond: Web terbuka
+  steps: ["Isi email benar + password salah", "Klik Masuk"]
+  expected: Tetap di Login + pesan galat, tanpa token tersimpan
+- id: TC-AUTH-03
+  module: Auth
+  title: Register akun kedua ditolak (single-user)
+  priority: High
+  type: negative
+  precond: DB sudah ada 1 user
+  steps: ["POST /v1/auth/register email baru"]
+  expected: 403 single_user_only
+- id: TC-AUTH-04
+  module: Auth
+  title: Akses tanpa token 401
+  priority: High
+  type: negative
+  precond: Tanpa header Authorization
+  steps: ["GET /v1/me tanpa token", "GET /v1/dashboard tanpa token"]
+  expected: 401 unauthorized keduanya
+- id: TC-AUTH-05
+  module: Auth
+  title: Token kedaluwarsa auto-logout
+  priority: Medium
+  type: functional
+  precond: Login, lalu hapus/invalidasi token localStorage
+  steps: ["Ganti lifeos_token dengan 'rusak'", "Reload", "Klik halaman mana pun"]
+  expected: Kembali ke Login (401 auto-logout)
+- id: TC-AUTH-06
+  module: Auth
+  title: Logout membersihkan sesi
+  priority: Medium
+  type: functional
+  precond: Login
+  steps: ["Klik Keluar", "Coba buka via back / reload"]
+  expected: Halaman Login; token hilang dari localStorage
+- id: TC-DASH-01
+  module: Dashboard
+  title: KPI cocok dengan data seed
+  priority: High
+  type: functional
+  precond: Login, DB seed P6+2A-D
+  steps: ["Buka Dasbor"]
+  expected: due_today 4, overdue 3, habits 5, net 7334001, goals aktif >0, subs 14d = 3
+- id: TC-DASH-02
+  module: Dashboard
+  title: Pengingat 7 hari tampil
+  priority: Low
+  type: functional
+  precond: Login
+  steps: ["Buka Dasbor, lihat kartu reminders 7d"]
+  expected: Item dengan T-days benar (mis. Long run T7)
+- id: TC-TASK-01
+  module: Tasks
+  title: Quick-add masuk inbox
+  priority: High
+  type: functional
+  precond: Login, halaman Tugas
+  steps: ["Ketik 'Beli susu' di quick-add", "Klik Catat"]
+  expected: Task status inbox muncul di list
+- id: TC-TASK-02
+  module: Tasks
+  title: Filter status bekerja
+  priority: Medium
+  type: functional
+  precond: Ada tasks beragam status
+  steps: ["Pilih filter completed"]
+  expected: Hanya tasks completed tampil
+- id: TC-TASK-03
+  module: Tasks
+  title: Toggle Hari ini vs Seminggu
+  priority: High
+  type: functional
+  precond: Ada task due hari ini + pekan ini
+  steps: ["Klik Hari ini", "Klik Seminggu"]
+  expected: Hari ini = due today saja; Seminggu = rentang 7 hari
+- id: TC-TASK-04
+  module: Tasks
+  title: Selesaikan task (DONE)
+  priority: High
+  type: functional
+  precond: Ada task in_progress
+  steps: ["Klik DONE", "Cek progress project terkait"]
+  expected: Status completed + completed_at terisi; progress project naik
+- id: TC-TASK-05
+  module: Tasks
+  title: Overdue hanya untuk belum selesai
+  priority: High
+  type: functional
+  precond: Ada task lewat due completed + in_progress
+  steps: ["Lihat flag OVERDUE di list"]
+  expected: Completed tak berflag; in_progress lewat due berflag + days negatif
+- id: TC-TASK-06
+  module: Tasks
+  title: Status ngawur ditolak API
+  priority: Medium
+  type: negative
+  precond: Token valid
+  steps: ["POST /v1/tasks {title, status ngawur}"]
+  expected: 400 invalid
+- id: TC-TASK-07
+  module: Tasks
+  title: Hapus butuh konfirmasi
+  priority: Low
+  type: ui
+  precond: Ada task
+  steps: ["Klik DEL", "Batalkan confirm"]
+  expected: Task tetap ada
+- id: TC-TASK-08
+  module: Tasks
+  title: PUT full-replace (by design)
+  priority: Medium
+  type: functional
+  precond: Task berd-e date
+  steps: ["PUT tanpa due_date", "GET detail"]
+  expected: due_date hilang (terdokumentasi, bukan bug)
+- id: TC-GOAL-01
+  module: Goals
+  title: Tiga tab level tampil
+  priority: High
+  type: functional
+  precond: Login
+  steps: ["Buka Goals", "Klik annual, quarterly, monthly"]
+  expected: Annual 4, quarterly 3, monthly 3 (seed)
+- id: TC-GOAL-02
+  module: Goals
+  title: Progress cap 0-100
+  priority: Medium
+  type: boundary
+  precond: Token valid
+  steps: ["Buat goal target 10 current 99", "Lihat progress"]
+  expected: 100 (bukan 990)
+- id: TC-GOAL-03
+  module: Goals
+  title: Quarterly wajib parent annual
+  priority: High
+  type: negative
+  precond: Token valid
+  steps: ["POST quarterly parent_id monthly"]
+  expected: 400 invalid_parent
+- id: TC-GOAL-04
+  module: Goals
+  title: Annual berparent ditolak
+  priority: Medium
+  type: negative
+  precond: Token valid
+  steps: ["POST annual parent_id 1"]
+  expected: 400 invalid_parent
+- id: TC-GOAL-05
+  module: Goals
+  title: Update current_value ubah progress
+  priority: High
+  type: functional
+  precond: Ada goal via UI
+  steps: ["Klik UPDATE", "Naikkan nilai", "Simpan"]
+  expected: Badge % berubah sesuai hitungan
+- id: TC-GOAL-06
+  module: Goals
+  title: Milestone tampil per goal + DONE
+  priority: High
+  type: functional
+  precond: Goal ber-milestone
+  steps: ["Lihat daftar ◆ di bawah goal", "Klik DONE satu milestone"]
+  expected: Tercoret/completed; overdue hilang
+- id: TC-GOAL-07
+  module: Goals
+  title: Milestone overdue berflag
+  priority: Medium
+  type: functional
+  precond: Seed (Long run 8K 09-09 pending)
+  steps: ["Buka tab quarterly", "Cari goal Q3 base"]
+  expected: Milestone 09-09 flag OVERDUE
+- id: TC-HABIT-01
+  module: Habits
+  title: Centang hari ini naikkan streak
+  priority: High
+  type: functional
+  precond: Login, habit daily
+  steps: ["Klik CENTANG", "Lihat badge streak"]
+  expected: Streak +1 (atau tetap bila sudah dicentang)
+- id: TC-HABIT-02
+  module: Habits
+  title: Heatmap 30 hari akurat
+  priority: High
+  type: functional
+  precond: Seed (h1 streak 20)
+  steps: ["Buka Habits", "Hitung kotak biru h1"]
+  expected: 30 kotak; cocok dengan /habits/:id/logs
+- id: TC-HABIT-03
+  module: Habits
+  title: Streak reset bila bolong
+  priority: Medium
+  type: functional
+  precond: Habit baca (bolong-bolong)
+  steps: ["Lihat badge streak h2"]
+  expected: Kecil (2), bukan akumulasi total
+- id: TC-HABIT-04
+  module: Habits
+  title: Frekuensi ngawur ditolak
+  priority: Low
+  type: negative
+  precond: Token valid
+  steps: ["POST /v1/habits {frequency hourly}"]
+  expected: 400 invalid
+- id: TC-FIN-01
+  module: Finance
+  title: Summary bulan cocok SQL
+  priority: High
+  type: functional
+  precond: Seed Sep 2026
+  steps: ["Pilih bulan 2026-09", "Lihat cashflow"]
+  expected: in 10jt, out 2665999, net 7334001
+- id: TC-FIN-02
+  module: Finance
+  title: Budget aktual = SUM transaksi
+  priority: High
+  type: functional
+  precond: Seed
+  steps: ["Lihat budget Makan Sep"]
+  expected: Aktual 358rb dari 1.5jt (23.87% safe)
+- id: TC-FIN-03
+  module: Finance
+  title: Status warning saat >= warn_pct
+  priority: Medium
+  type: boundary
+  precond: Seed (Hunian 98.75%)
+  steps: ["Lihat budget Hunian"]
+  expected: Status warning (kuning)
+- id: TC-FIN-04
+  module: Finance
+  title: Tipe transaksi ngawur ditolak
+  priority: Medium
+  type: negative
+  precond: Token valid
+  steps: ["POST trx type ngawur"]
+  expected: 400 invalid
+- id: TC-FIN-05
+  module: Finance
+  title: Nominal nol/negatif ditolak
+  priority: Medium
+  type: boundary
+  precond: Token valid
+  steps: ["POST trx amount 0", "POST trx amount -5"]
+  expected: 400 keduanya
+- id: TC-FIN-06
+  module: Finance
+  title: Subs upcoming dalam 14 hari
+  priority: Medium
+  type: functional
+  precond: Seed (iCloud 18 Sep)
+  steps: ["Lihat kartu subs"]
+  expected: iCloud T4 muncul; domain 2027 tak muncul
+- id: TC-FIN-07
+  module: Finance
+  title: Tabungan ETA bulan benar
+  priority: Medium
+  type: functional
+  precond: Seed (Dana darurat 8/20jt, 800rb/bln)
+  steps: ["Lihat kartu tabungan"]
+  expected: 40%, ETA 15 bln
+- id: TC-HL-01
+  module: HealthLearn
+  title: Simpan health hari ini
+  priority: Medium
+  type: functional
+  precond: Login
+  steps: ["Isi tidur + mood", "Simpan", "Reload"]
+  expected: Nilai tampil (upsert, bukan duplikat)
+- id: TC-HL-02
+  module: HealthLearn
+  title: Mood di luar 1-5 ditolak
+  priority: Low
+  type: boundary
+  precond: Token valid
+  steps: ["PUT health {mood 9}"]
+  expected: 400 invalid
+- id: TC-HL-03
+  module: HealthLearn
+  title: Tambah workout + learning + reading
+  priority: Medium
+  type: functional
+  precond: Login
+  steps: ["Catat workout", "Tambah learning + reading"]
+  expected: Muncul di seksi masing-masing
+- id: TC-CAL-01
+  module: Calendar
+  title: Agregat 4 sumber tampil
+  priority: Medium
+  type: functional
+  precond: Seed Sep 2026
+  steps: ["Buka Kalender Sep 2026"]
+  expected: Ada ▸ ◎ ₿ ◆ pada tanggal yang benar
+- id: TC-CAL-02
+  module: Calendar
+  title: Navigasi bulan
+  priority: Low
+  type: functional
+  precond: Halaman Kalender
+  steps: ["Klik → lalu ←"]
+  expected: Bulan geser dan kembali, grid valid
+- id: TC-TRV-01
+  module: Travel
+  title: Detail trip + actual_cost
+  priority: Medium
+  type: functional
+  precond: Seed (Bandung)
+  steps: ["Buka Travel"]
+  expected: Aktual 430rb dari budget 1.5jt; 4 itinerary; 4 packing
+- id: TC-TRV-02
+  module: Travel
+  title: Tanggal pulang < berangkat ditolak
+  priority: Low
+  type: negative
+  precond: Token valid
+  steps: ["POST trip end < start"]
+  expected: 400 invalid
+- id: TC-DEC-01
+  module: Decisions
+  title: Ranking terbobot benar
+  priority: High
+  type: functional
+  precond: Seed (laptop)
+  steps: ["Buka Keputusan, pilih 'Pilih laptop baru'"]
+  expected: ThinkPad #1 total 69, MacBook #2 total 47
+- id: TC-DEC-02
+  module: Decisions
+  title: Nilai baru hitung ulang rank
+  priority: Medium
+  type: functional
+  precond: Ada decision
+  steps: ["Tambah opsi", "Nilai 2 kriteria", "Lihat rank"]
+  expected: Rank sesuai total
+- id: TC-AST-01
+  module: Assets
+  title: Flag garansi + dokumen upcoming
+  priority: Medium
+  type: functional
+  precond: Seed (kulkas garansi 05 Okt, kontrak 30 Sep)
+  steps: ["Buka Aset"]
+  expected: Kulkas flag GARANSI; kontrak di upcoming T16
+- id: TC-AST-02
+  module: Assets
+  title: Wishlist progress = saved/est
+  priority: Low
+  type: functional
+  precond: Seed
+  steps: ["Lihat wishlist sepatu"]
+  expected: 33% (600rb/1.8jt)
+- id: TC-CTC-01
+  module: Contacts
+  title: FOLLOW-UP untuk kontak lama
+  priority: Medium
+  type: functional
+  precond: Seed (Budi terakhir 07-01)
+  steps: ["Buka Relasi"]
+  expected: Budi badge FOLLOW-UP; Ibu tidak
+- id: TC-CTC-02
+  module: Contacts
+  title: SAPA reset follow-up
+  priority: Medium
+  type: functional
+  precond: Budi FOLLOW-UP
+  steps: ["Klik SAPA Budi"]
+  expected: Badge hilang, last_contact = hari ini
+- id: TC-REV-01
+  module: Reviews
+  title: Tiga tab periode
+  priority: High
+  type: functional
+  precond: Seed
+  steps: ["Buka Review, klik weekly/monthly/yearly"]
+  expected: Weekly 1, monthly 2, yearly 1
+- id: TC-REV-02
+  module: Reviews
+  title: Auto-stat terisi saat create
+  priority: High
+  type: functional
+  precond: Token valid
+  steps: ["POST monthly {period 2026-10}", "GET detail"]
+  expected: tasks_due/done, habit_checks, income/expense terisi (bukan {})
+- id: TC-REV-03
+  module: Reviews
+  title: Periode salah format ditolak
+  priority: Medium
+  type: negative
+  precond: Token valid
+  steps: ["POST monthly {period 2026-13}", "POST yearly {period 2026-09}"]
+  expected: 400 invalid_period keduanya
+- id: TC-REM-01
+  module: Reminders
+  title: Recurrence hitung next
+  priority: Medium
+  type: functional
+  precond: Seed (kos monthly 01 Okt)
+  steps: ["Buka Pengingat"]
+  expected: next 2026-10-01, T17
+- id: TC-REM-02
+  module: Reminders
+  title: Hapus butuh konfirmasi
+  priority: Low
+  type: ui
+  precond: Ada reminder
+  steps: ["Klik DEL", "Batalkan"]
+  expected: Tetap ada
+- id: TC-API-01
+  module: API
+  title: Newman suite hijau
+  priority: High
+  type: automation
+  precond: API + DB fresh seed
+  steps: ["npx newman run api/postman_collection.json"]
+  expected: 75/75 assertions pass
+- id: TC-API-02
+  module: API
+  title: Swagger valid
+  priority: Medium
+  type: automation
+  precond: "-"
+  steps: ["swagger-cli validate api/swagger.yaml"]
+  expected: valid
+- id: TC-API-03
+  module: API
+  title: Halaman tak ada 404
+  priority: Low
+  type: negative
+  precond: Token valid
+  steps: ["GET /v1/tasks/999999", "GET /v1/goals/999999"]
+  expected: 404 not_found
+- id: TC-API-04
+  module: API
+  title: Unit test service gate
+  priority: Medium
+  type: automation
+  precond: Repo lifeos
+  steps: ["go test ./... -cover"]
+  expected: Pass, service ≥ 60%

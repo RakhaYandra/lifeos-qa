@@ -1,0 +1,5 @@
+project: LifeOS QA
+version: "1.0"
+date: "2026-09-14"
+environment: API :8080 + Web :5174 lokal, Chromium headless, akun aku@lifeos.local
+tester: Rakha

@@ -1,0 +1,32 @@
+- id: BUG-001
+  title: PUT task tanpa due_date menghapus due_date (full-replace)
+  severity: Medium
+  status: Open
+  steps: ["PUT /v1/tasks/:id tanpa due_date", "GET detail"]
+  actual: due_date hilang (null)
+  expected: "Terdokumentasi sebagai by-design; UI kirim objek penuh saat DONE"
+  found_in: TC-TASK-04
+- id: BUG-002
+  title: Dashboard bocorkan field internal _ts
+  severity: Low
+  status: Open
+  steps: ["GET /v1/dashboard"]
+  actual: Respon berisi _ts unix timestamp tak terdokumentasi
+  expected: Field internal jangan diekspos, atau dokumentasikan
+  found_in: TC-DASH-01
+- id: BUG-003
+  title: Pesan validasi backend mentah (gin) bocor ke UI
+  severity: Low
+  status: Open
+  steps: ["POST /v1/savings target 0", "Lihat error di UI"]
+  actual: "Key: 'savingIn.TargetAmount' Error:Field validation...failed on 'required'"
+  expected: Pesan ramah (mis. nominal harus > 0)
+  found_in: TC-FIN-05
+- id: BUG-004
+  title: Label form tanpa htmlFor (asosiasi label-input tak valid)
+  severity: Low
+  status: Open
+  steps: ["Buka dialog mana pun", "getByLabel Playwright", "Isi via automation"]
+  actual: getByLabel flaky (count 0 / fill timeout); screen reader tak mengaitkan label-input
+  expected: Label pakai htmlFor + input id (aksesibilitas + automation stabil)
+  found_in: TC-GOAL-05
