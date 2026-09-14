@@ -45,11 +45,23 @@ npx newman run ../lifeos/api/postman_collection.json \
 
 # 3. API checks, 4. e2e (webServer otomatis :5199)
 python3 /tmp/qa_run.py   # → data/results.yaml (skrip di repo? tidak — ad-hoc)
+cp .env.example .env 2>/dev/null; export $(cat .env 2>/dev/null | grep QA_ | xargs) 2>/dev/null
 cd e2e && npx playwright test
 
-# 5. Generate laporan
+# 5. Generate laporan + sanitasi sebelum commit
 python3 tools/build_report.py
+python3 tools/redact_reports.py   # hapus token/bodies newman, path absolut playwright
 ```
+
+## Hygiene
+
+* Kredensial demo (`aku@lifeos.local`) di dokumen adalah akun fiktif sekali pakai
+  (publik by design, sama seperti README `lifeos`). Password hanya via env
+  `QA_PASSWORD` (lihat `e2e/.env.example`) — tak ada literal di kode.
+* `reports/newman.json` + `playwright.json` selalu lewat `redact_reports.py`
+  sebelum commit (token, body, path mesin uji).
+* `shiftbase` + `shiftbase-web` teraudit bersih: tanpa token/path pribadi
+  (hanya kredensial demo + password throwaway lokal-CI).
 
 ## Bug temuan (ringkas)
 

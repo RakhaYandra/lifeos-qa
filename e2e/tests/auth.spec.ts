@@ -1,11 +1,5 @@
 import { test, expect } from '@playwright/test';
-
-async function login(page: any, email = 'aku@lifeos.local', pass = 'Rahasia123') {
-  await page.goto('/');
-  await page.getByLabel('Email').fill(email);
-  await page.getByLabel('Kata sandi').fill(pass);
-  await page.getByRole('button', { name: 'Masuk' }).click();
-}
+import { login } from './helpers';
 
 test('TC-AUTH-01 login benar masuk dashboard', async ({ page }) => {
   await login(page);
