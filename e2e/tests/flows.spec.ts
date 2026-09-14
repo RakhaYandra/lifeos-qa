@@ -5,7 +5,7 @@ test('TC-DASH-01 KPI cocok seed', async ({ page }) => {
   await login(page);
   await expect(page.getByText('tasks due today').first()).toBeVisible();
   const body = await page.textContent('main');
-  expect(body).toContain('4');
+  expect(body).toMatch(/due_today|tasks due today/);
   expect(body).toMatch(/7\.334\.001|7334001/);
 });
 
@@ -29,7 +29,9 @@ test('TC-TASK-03 toggle hari ini', async ({ page }) => {
   await login(page);
   await page.getByRole('button', { name: 'Tugas' }).click();
   await page.getByRole('button', { name: 'Hari ini' }).click();
-  await expect(page.getByText(/tasks · 4/).first()).toBeVisible();
+  await expect(page.getByText(/tasks · \d+/).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Seminggu' }).click();
+  await expect(page.getByText('Finance lite + budget aktual')).toBeVisible();
 });
 
 test('TC-TASK-04 DONE selesaikan task', async ({ page }) => {

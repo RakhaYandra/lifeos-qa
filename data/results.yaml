@@ -1,4 +1,4 @@
-# run 2026-09-14T23:39:03
+# run 2026-09-15T01:52:08
 TC-API-03: Pass
 TC-AST-01: Pass
 TC-AST-02: Pass
@@ -7,7 +7,7 @@ TC-AUTH-03: Pass
 TC-AUTH-04: Pass
 TC-CTC-01: Pass
 TC-CTC-02: Pass
-TC-DASH-01: Pass  # {"due_today": 4, "overdue": 3, "total": 25}
+TC-DASH-01: Pass  # {"due_today": 0, "overdue": 7, "total": 25}
 TC-DASH-02: Pass
 TC-DEC-01: Pass
 TC-DEC-02: Pass

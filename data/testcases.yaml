@@ -446,3 +446,43 @@
   precond: Repo lifeos
   steps: ["go test ./... -cover"]
   expected: Pass, service ≥ 60%
+- id: TC-CAL-03
+  module: Calendar
+  title: Halaman kalender render + legenda
+  priority: Low
+  type: ui
+  precond: Login
+  steps: ["Buka Kalender", "Lihat grid + legenda"]
+  expected: Bulan tampil, legenda ▸◎₿◆ ada
+- id: TC-TRV-03
+  module: Travel
+  title: Halaman travel lengkap
+  priority: Medium
+  type: ui
+  precond: Seed Bandung
+  steps: ["Buka Travel"]
+  expected: Trip + 4 itinerary + 4 packing tampil
+- id: TC-DEC-03
+  module: Decisions
+  title: Halaman keputusan + tambah opsi
+  priority: Medium
+  type: ui
+  precond: Login
+  steps: ["Buka Keputusan", "Tambah opsi baru"]
+  expected: Ranking tampil, opsi baru muncul
+- id: TC-AST-03
+  module: Assets
+  title: Halaman aset 3 seksi
+  priority: Low
+  type: ui
+  precond: Seed
+  steps: ["Buka Aset"]
+  expected: Aset + wishlist + dokumen tampil
+- id: TC-CTC-03
+  module: Contacts
+  title: Halaman relasi tambah kontak
+  priority: Medium
+  type: ui
+  precond: Login
+  steps: ["Buka Relasi", "Tambah kontak baru"]
+  expected: Kontak baru muncul di list
