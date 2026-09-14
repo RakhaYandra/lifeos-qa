@@ -1,7 +1,8 @@
 - id: BUG-001
   title: PUT task tanpa due_date menghapus due_date (full-replace)
   severity: Medium
-  status: Open
+  status: Fixed
+  resolution: By design — README + swagger nyatakan PUT full-replace; UI kirim objek penuh
   steps: ["PUT /v1/tasks/:id tanpa due_date", "GET detail"]
   actual: due_date hilang (null)
   expected: "Terdokumentasi sebagai by-design; UI kirim objek penuh saat DONE"
@@ -9,7 +10,8 @@
 - id: BUG-002
   title: Dashboard bocorkan field internal _ts
   severity: Low
-  status: Open
+  status: Fixed
+  resolution: Field _ts dihapus dari dashboard_handler.go
   steps: ["GET /v1/dashboard"]
   actual: Respon berisi _ts unix timestamp tak terdokumentasi
   expected: Field internal jangan diekspos, atau dokumentasikan
@@ -17,7 +19,8 @@
 - id: BUG-003
   title: Pesan validasi backend mentah (gin) bocor ke UI
   severity: Low
-  status: Open
+  status: Fixed
+  resolution: Helper badRequest 400 invalid di ~40 bind failure (errors.go)
   steps: ["POST /v1/savings target 0", "Lihat error di UI"]
   actual: "Key: 'savingIn.TargetAmount' Error:Field validation...failed on 'required'"
   expected: Pesan ramah (mis. nominal harus > 0)
@@ -25,7 +28,8 @@
 - id: BUG-004
   title: Label form tanpa htmlFor (asosiasi label-input tak valid)
   severity: Low
-  status: Open
+  status: Fixed
+  resolution: Komponen Field (useId) + htmlFor/id semua form + aria-label; bukti e2e getByLabel
   steps: ["Buka dialog mana pun", "getByLabel Playwright", "Isi via automation"]
   actual: getByLabel flaky (count 0 / fill timeout); screen reader tak mengaitkan label-input
   expected: Label pakai htmlFor + input id (aksesibilitas + automation stabil)

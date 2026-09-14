@@ -16,7 +16,7 @@ test('TC-GOAL-05 UI update progres', async ({ page }) => {
   await page.getByRole('button', { name: 'Goals' }).click();
   const card = page.locator('div', { hasText: 'Dana darurat 20jt' }).last();
   await card.getByText('UPDATE', { exact: true }).click();
-  await page.getByRole('spinbutton').fill('9000000');
+  await page.getByLabel('Nilai saat ini').fill('9000000');
   await page.getByRole('button', { name: 'Simpan' }).click();
   await expect(page.getByText('45%').first()).toBeVisible();
 });
@@ -34,9 +34,8 @@ test('TC-REV-02 UI buat review bulanan', async ({ page }) => {
   await page.getByRole('button', { name: 'Review' }).click();
   await page.getByRole('button', { name: 'monthly', exact: true }).click();
   await page.getByRole('button', { name: 'Tulis review' }).click();
-  const boxes = page.getByRole('textbox');
-  await boxes.nth(0).fill('2026-10');
-  await boxes.nth(1).fill('QA e2e');
+  await page.getByLabel(/Bulan|Mulai pekan|Tahun/).fill('2026-10');
+  await page.getByLabel('Menang').fill('QA e2e');
   await page.getByRole('button', { name: 'Simpan' }).click();
   await expect(page.getByText('2026-10')).toBeVisible();
 });

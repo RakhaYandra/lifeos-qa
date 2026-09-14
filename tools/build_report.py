@@ -148,13 +148,13 @@ def main():
 
     # 4. Bug Reports
     ws = wb.create_sheet("Bug Reports")
-    cols = ["ID", "Judul", "Severity", "Status", "Langkah Repro", "Aktual", "Ekspektasi", "Ditemukan di"]
+    cols = ["ID", "Judul", "Severity", "Status", "Langkah Repro", "Aktual", "Ekspektasi", "Resolusi", "Ditemukan di"]
     ws.append(cols)
     for b in bugs:
         ws.append([b["id"], b["title"], b["severity"], b["status"],
                    "\n".join(f"{i+1}. {s}" for i, s in enumerate(b["steps"])),
-                   b["actual"], b["expected"], b["found_in"]])
-    for c, w in zip("ABCDEFGH", [10, 40, 10, 10, 35, 40, 40, 14]):
+                   b["actual"], b["expected"], b.get("resolution", ""), b["found_in"]])
+    for c, w in zip("ABCDEFGHI", [10, 40, 10, 10, 35, 40, 40, 40, 14]):
         ws.column_dimensions[c].width = w
     style_header(ws, len(cols))
     border_all(ws)
