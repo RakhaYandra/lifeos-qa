@@ -1,17 +1,59 @@
 # lifeos-qa
 
-QA portfolio untuk LifeOS — test plan, 56 test cases, eksekusi ber-evidence,
-4 bug report nyata, Newman API suite, Playwright e2e, laporan Excel.
+QA portfolio untuk LifeOS — test plan, 61 test cases, eksekusi ber-evidence,
+4 bug report nyata (semua Fixed), Newman API suite, Playwright e2e, laporan Excel.
 
-## Hasil (run 2026-09-14, env terisolasi)
+## Purpose, Output & Expectations
+
+**Purpose.** A personal app with 13 pages and 30+ endpoints cannot be trusted
+on developer testing alone — especially with no production deployment to learn
+from. This repo proves LifeOS quality with evidence instead of claims.
+
+**Output.** A test plan, 61 test cases (100% executed with evidence), 4 real
+bug reports (all fixed and re-verified), a 75-assertion Newman API suite, 26
+Playwright end-to-end tests, and a 5-sheet Excel report generated from data —
+plus secret hygiene (tokens redacted, passwords via env).
+
+**Expectations.** After reading: any selected test case can be traced to its
+evidence (API log, screenshot, or report row); every bug links to its fix
+commit; the full run is reproducible locally in documented order.
+
+## Features
+
+| Feature | Description |
+|---|---|
+| Test plan | - Scope (13 pages + API), approach (manual + automation), entry/exit criteria, risks (fixed seed dates vs drifting today). - Purpose: define what "done" means before testing. Output: agreed scope and gates. |
+| Test cases | - 61 cases in YAML (functional, boundary, negative, UI, automation) with IDs, steps, expectations. - Purpose: single source of truth. Output: machine-readable spec feeding the report. |
+| Bug reports | - 4 real bugs with repro steps, severity, and resolution (PUT full-replace, dashboard `_ts` leak, raw gin errors, labels without `htmlFor`). - Purpose: findings with proof, not opinions. Output: Fixed + re-verified. |
+| Newman suite | - Reuses the API collection: register-block, login→token, full module flow + cleanup. - Purpose: automated API regression. Output: 75/75 assertions. |
+| Playwright e2e | - 26 tests (Chromium headless): auth, critical flows, page coverage incl. heatmap and label-association proof. - Purpose: prove the UI works for a human. Output: green run + failure screenshots. |
+| Excel report | - Generated via openpyxl (never hand-edited): Cover, Cases, Execution Log, Bugs, Summary with COUNTIF + chart. - Purpose: recruiter-readable evidence. Output: `LifeOS-QA-Report.xlsx`. |
+| Hygiene | - `redact_reports.py`: strips tokens/bodies/absolute paths before every commit. - Purpose: public repo without leaking test secrets. Output: 0 secrets in tracked files. |
+
+## How It Works
+
+```mermaid
+flowchart TD
+    S[Specs: testcases.yaml] --> E[Isolated env: fresh DB + API :18091]
+    E --> N[1. Newman probes]
+    N --> A[2. API checks]
+    A --> U[3. Playwright e2e on :5199]
+    U --> R[results.yaml + JSON reports]
+    R --> X[build_report.py]
+    X --> XLSX[LifeOS-QA-Report.xlsx]
+    R --> RD[redact_reports.py]
+    RD --> P[Commit + push]
+```
+
+## Hasil (run 2026-09-15, env terisolasi)
 
 | Suite | Hasil |
 |---|---|
-| Test cases | 56/56 Pass |
+| Test cases | 61/61 Pass |
 | Newman API (`lifeos` collection) | 75/75 assertions |
-| Playwright e2e (Chromium headless) | 21/21 |
+| Playwright e2e (Chromium headless) | 26/26 |
 | `go test` + swagger validate | Pass, service 83.4% |
-| Bug terbuka | 4 (1 Medium, 3 Low) |
+| Bug terbuka | 0 (4 Fixed) |
 
 Laporan utama: [`reports/LifeOS-QA-Report.xlsx`](reports/LifeOS-QA-Report.xlsx)
 (Cover, Test Cases, Execution Log, Bug Reports, Summary + grafik —
